@@ -1,8 +1,9 @@
-# Airthings Wave Plus Sensor Reader
+# Airthings Wave Plus Sensor Reader + Prometheus exports
 
-This is a project to provide users an interface (```read_waveplus.py```) to read current sensor values from the
+This is a fork of https://github.com/Airthings/waveplus-reader to provide users an 
+interface (```read_waveplus.py```) to read current sensor values from the
 [Airthings Wave Plus](https://airthings.com/wave-plus/) devices using a Raspberry Pi 3 
-Model B over Bluetooth Low Energy (BLE).
+Model B over Bluetooth Low Energy (BLE) and export values for Prometheus scraping. 
 
 Airthings Wave Plus is a smart IAQ monitor with Radon detection, including sensors for
 temperature, air pressure, humidity, TVOCs and CO2.
@@ -37,8 +38,8 @@ The following tables shows a compact overview of dependencies for this project.
 
 | package | version | Comments |
 |-------------|-------------|-------------|
-| python         | 2.7 | Tested with python 2.7.13
-| python-pip     |     | pip for python2.7
+| python         | 3.x | Tested with python 3.9.2
+| python3-pip     |     | pip for python3.9
 | git            |     | To download this project
 | libglib2.0-dev |     | For bluepy module
 
@@ -46,8 +47,9 @@ The following tables shows a compact overview of dependencies for this project.
 
 | module | version | Comments |
 |-------------|-------------|-------------|
-| bluepy      | 1.2.0 | Newer versions have not been tested.
-| tableprint  | 0.8.0 | Newer versions have not been tested.
+| bluepy      | 1.3.0 | Newer versions have not been tested.
+| tableprint  | 0.9.1 | Newer versions have not been tested.
+| prometheus-client| 0.14.1 |Newer versions have not been tested.
 
 ## Setup Raspberry Pi
 
@@ -86,11 +88,11 @@ to the Raspberry Pi terminal window. Look for ```Powered: yes```.
 > **Note:** The ```read_waveplus.py``` script is only compatible with Python2.7.
 
 The next step is to install the bluepy Python library for talking to the BLE stack. 
-For the current released version for Python 2.7:
+For the current released version for Python 3.9:
 
 ```
-pi@raspberrypi:~$ sudo apt-get install python-pip libglib2.0-dev
-pi@raspberrypi:~$ sudo pip2 install bluepy==1.2.0
+pi@raspberrypi:~$ sudo apt-get install python3-pip libglib2.0-dev
+pi@raspberrypi:~$ sudo pip2 install bluepy==1.3.0
 ```
 
 Make sure your Raspberry Pi has git installed
@@ -109,23 +111,23 @@ Additionally, the ```read_waveplus.py``` script depends on the ```tableprint``` 
 to print nicely formated sensor data to the Raspberry Pi terminal at run-time.
 
 ```
-pi@raspberrypi:~$ sudo pip2 install tableprint==0.8.0
+pi@raspberrypi:~$ sudo pip install tableprint==0.9.1 prometheus-client
 ```
 
-> **Note:** The ```read_waveplus.py``` script has been tested with bluepy==1.2.0 and tableprint==0.8.0. You may download the latest versions at your own risk.
+> **Note:** The ```read_waveplus.py``` script has been tested with bluepy==1.230 and tableprint==0.9.1. You may download the latest versions at your own risk.
 
 ## Downloading script
 
 Downloading using git:
 
 ```
-pi@raspberrypi:~$ sudo git clone https://github.com/Airthings/waveplus-reader.git
+pi@raspberrypi:~$ sudo git clone https://github.com/sweeneyb/waveplus-reader.git
 ```
 
 Downloading using wget:
 
 ```
-pi@raspberrypi:~$ wget https://raw.githubusercontent.com/Airthings/waveplus-reader/master/read_waveplus.py
+pi@raspberrypi:~$ wget https://raw.githubusercontent.com/sweeneyb/waveplus-reader/master/read_waveplus.py
 ```
 
 # Usage

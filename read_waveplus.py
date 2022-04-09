@@ -31,33 +31,35 @@ import sys
 import time
 import struct
 import tableprint
+from prometheus_client import Gauge
+from prometheus_client import start_http_server
 
 # ===============================
 # Script guards for correct usage
 # ===============================
 
 if len(sys.argv) < 3:
-    print "ERROR: Missing input argument SN or SAMPLE-PERIOD."
-    print "USAGE: read_waveplus.py SN SAMPLE-PERIOD [pipe > yourfile.txt]"
-    print "    where SN is the 10-digit serial number found under the magnetic backplate of your Wave Plus."
-    print "    where SAMPLE-PERIOD is the time in seconds between reading the current values."
-    print "    where [pipe > yourfile.txt] is optional and specifies that you want to pipe your results to yourfile.txt."
+    print ("ERROR: Missing input argument SN or SAMPLE-PERIOD.")
+    print ("USAGE: read_waveplus.py SN SAMPLE-PERIOD [pipe > yourfile.txt]")
+    print ("    where SN is the 10-digit serial number found under the magnetic backplate of your Wave Plus.")
+    print ("    where SAMPLE-PERIOD is the time in seconds between reading the current values.")
+    print ("    where [pipe > yourfile.txt] is optional and specifies that you want to pipe your results to yourfile.txt.")
     sys.exit(1)
 
 if sys.argv[1].isdigit() is not True or len(sys.argv[1]) != 10:
-    print "ERROR: Invalid SN format."
-    print "USAGE: read_waveplus.py SN SAMPLE-PERIOD [pipe > yourfile.txt]"
-    print "    where SN is the 10-digit serial number found under the magnetic backplate of your Wave Plus."
-    print "    where SAMPLE-PERIOD is the time in seconds between reading the current values."
-    print "    where [pipe > yourfile.txt] is optional and specifies that you want to pipe your results to yourfile.txt."
+    print ("ERROR: Invalid SN format.")
+    print ("USAGE: read_waveplus.py SN SAMPLE-PERIOD [pipe > yourfile.txt]")
+    print ("    where SN is the 10-digit serial number found under the magnetic backplate of your Wave Plus.")
+    print ("    where SAMPLE-PERIOD is the time in seconds between reading the current values.")
+    print ("    where [pipe > yourfile.txt] is optional and specifies that you want to pipe your results to yourfile.txt.")
     sys.exit(1)
 
 if sys.argv[2].isdigit() is not True or int(sys.argv[2])<0:
-    print "ERROR: Invalid SAMPLE-PERIOD. Must be a numerical value larger than zero."
-    print "USAGE: read_waveplus.py SN SAMPLE-PERIOD [pipe > yourfile.txt]"
-    print "    where SN is the 10-digit serial number found under the magnetic backplate of your Wave Plus."
-    print "    where SAMPLE-PERIOD is the time in seconds between reading the current values."
-    print "    where [pipe > yourfile.txt] is optional and specifies that you want to pipe your results to yourfile.txt."
+    print ("ERROR: Invalid SAMPLE-PERIOD. Must be a numerical value larger than zero.")
+    print ("USAGE: read_waveplus.py SN SAMPLE-PERIOD [pipe > yourfile.txt]")
+    print ("    where SN is the 10-digit serial number found under the magnetic backplate of your Wave Plus.")
+    print ("    where SAMPLE-PERIOD is the time in seconds between reading the current values.")
+    print ("    where [pipe > yourfile.txt] is optional and specifies that you want to pipe your results to yourfile.txt.")
     sys.exit(1)
 
 if len(sys.argv) > 3:
@@ -66,11 +68,11 @@ else:
     Mode = 'terminal' # (default) print to terminal 
 
 if Mode!='pipe' and Mode!='terminal':
-    print "ERROR: Invalid piping method."
-    print "USAGE: read_waveplus.py SN SAMPLE-PERIOD [pipe > yourfile.txt]"
-    print "    where SN is the 10-digit serial number found under the magnetic backplate of your Wave Plus."
-    print "    where SAMPLE-PERIOD is the time in seconds between reading the current values."
-    print "    where [pipe > yourfile.txt] is optional and specifies that you want to pipe your results to yourfile.txt."
+    print ("ERROR: Invalid piping method.")
+    print ("USAGE: read_waveplus.py SN SAMPLE-PERIOD [pipe > yourfile.txt]")
+    print ("    where SN is the 10-digit serial number found under the magnetic backplate of your Wave Plus.")
+    print ("    where SAMPLE-PERIOD is the time in seconds between reading the current values.")
+    print ("    where [pipe > yourfile.txt] is optional and specifies that you want to pipe your results to yourfile.txt.")
     sys.exit(1)
 
 SerialNumber = int(sys.argv[1])
@@ -126,10 +128,10 @@ class WavePlus():
                         break # exit for loop
             
             if (self.MacAddr is None):
-                print "ERROR: Could not find device."
-                print "GUIDE: (1) Please verify the serial number."
-                print "       (2) Ensure that the device is advertising."
-                print "       (3) Retry connection."
+                print ("ERROR: Could not find device.")
+                print ("GUIDE: (1) Please verify the serial number.")
+                print ("       (2) Ensure that the device is advertising.")
+                print ("       (3) Retry connection.")
                 sys.exit(1)
         
         # Connect to device
@@ -140,7 +142,7 @@ class WavePlus():
         
     def read(self):
         if (self.curr_val_char is None):
-            print "ERROR: Devices are not connected."
+            print ("ERROR: Devices are not connected.")
             sys.exit(1)            
         rawdata = self.curr_val_char.read()
         rawdata = struct.unpack('<BBBBHHHHHHHH', rawdata)
@@ -184,8 +186,8 @@ class Sensors():
             self.sensor_data[SENSOR_IDX_CO2_LVL]              = rawData[8]*1.0
             self.sensor_data[SENSOR_IDX_VOC_LVL]              = rawData[9]*1.0
         else:
-            print "ERROR: Unknown sensor version.\n"
-            print "GUIDE: Contact Airthings for support.\n"
+            print ("ERROR: Unknown sensor version.\n")
+            print ("GUIDE: Contact Airthings for support.\n")
             sys.exit(1)
    
     def conv2radon(self, radon_raw):
@@ -205,17 +207,26 @@ try:
     waveplus = WavePlus(SerialNumber)
     
     if (Mode=='terminal'):
-        print "\nPress ctrl+C to exit program\n"
+        print ("\nPress ctrl+C to exit program\n")
     
-    print "Device serial number: %s" %(SerialNumber)
+    print ("Device serial number: %s" %(SerialNumber))
     
     header = ['Humidity', 'Radon ST avg', 'Radon LT avg', 'Temperature', 'Pressure', 'CO2 level', 'VOC level']
     
     if (Mode=='terminal'):
-        print tableprint.header(header, width=12)
+        print (tableprint.header(header, width=12))
     elif (Mode=='pipe'):
-        print header
-        
+        print (header)
+    
+    humity_gauge = Gauge('humidity', "Humidity measured in %rH")
+    radon_st_gauge = Gauge('radon_short_term', "Short term radon levels in Bq/m3" )
+    radon_lt_gauge = Gauge('radon_long_term', "Long term radon levels in Bq/m3" )
+    temp_guage = Gauge('temperature', "Temp in Celcius")
+    pressure_guage = Gauge('pressure', "Atmospheric pressure in hPa")
+    co2_gauge = Gauge('CO2', "Carbon Dioxide levels in parts per million")
+    voc_gauge = Gauge("voc", "Volatile organic compound levels in parts per billion")
+    start_http_server(8080)
+    
     while True:
         
         waveplus.connect()
@@ -236,9 +247,17 @@ try:
         data = [humidity, radon_st_avg, radon_lt_avg, temperature, pressure, CO2_lvl, VOC_lvl]
         
         if (Mode=='terminal'):
-            print tableprint.row(data, width=12)
+            print (tableprint.row(data, width=12))
         elif (Mode=='pipe'):
-            print data
+            print (data)
+        
+        humity_gauge.set(sensors.getValue(SENSOR_IDX_HUMIDITY))
+        radon_st_gauge.set(sensors.getValue(SENSOR_IDX_RADON_SHORT_TERM_AVG))
+        radon_lt_gauge.set(sensors.getValue(SENSOR_IDX_RADON_LONG_TERM_AVG))
+        temp_guage.set(sensors.getValue(SENSOR_IDX_TEMPERATURE))
+        pressure_guage.set(sensors.getValue(SENSOR_IDX_REL_ATM_PRESSURE)) 
+        co2_gauge.set(sensors.getValue(SENSOR_IDX_CO2_LVL))
+        voc_gauge.set(sensors.getValue(SENSOR_IDX_VOC_LVL))
         
         waveplus.disconnect()
         
