@@ -185,6 +185,33 @@ where you change ```SN``` with the 10-digit serial number, and change ```SAMPLE-
 
 Exit the script using ```Ctrl+C```.
 
+## Prometheus exports
+Prometheus data is exported as a gauge for all documented sensors below.  It is exposed via a web server on port ```8080```.  Among the other standard python metrics you can safely ignore, it should look something like
+
+```
+# HELP humidity Humidity measured in %rH
+# TYPE humidity gauge
+humidity 44.0
+# HELP radon_short_term Short term radon levels in Bq/m3
+# TYPE radon_short_term gauge
+radon_short_term 54.0
+# HELP radon_long_term Long term radon levels in Bq/m3
+# TYPE radon_long_term gauge
+radon_long_term 106.0
+# HELP temperature Temp in Celcius
+# TYPE temperature gauge
+temperature 18.82
+# HELP pressure Atmospheric pressure in hPa
+# TYPE pressure gauge
+pressure 983.88
+# HELP CO2 Carbon Dioxide levels in parts per million
+# TYPE CO2 gauge
+CO2 473.0
+# HELP voc Volatile organic compound levels in parts per billion
+# TYPE voc gauge
+voc 91.0
+```
+
 # Sensor data description
 
 | sensor | units | Comments |
